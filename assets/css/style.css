@@ -179,3 +179,10 @@ main { max-width: 1080px; margin: 0 auto; padding: 0 clamp(1.2rem, 5vw, 4rem); }
 
 /* keyboard focus */
 a:focus-visible { outline: 2px solid var(--marginalia); outline-offset: 3px; }
+
+/* full-width figure inside a feature card */
+.feature-prose { max-width: var(--measure); }
+.feature-figure--wide { margin-top: 2rem; }
+.feature-figure--wide img { width: 100%; height: auto; display: block; }
+.feature-figure--wide a { display: block; }
+a:focus-visible { outline: 2px solid var(--marginalia); outline-offset: 3px; }
