@@ -182,7 +182,6 @@ a:focus-visible { outline: 2px solid var(--marginalia); outline-offset: 3px; }
 
 /* full-width figure inside a feature card */
 .feature-prose { max-width: var(--measure); }
-.feature-figure--wide { margin-top: 2rem; }
+.feature-figure--wide { margin-top: 3.5rem; }
 .feature-figure--wide img { width: 100%; height: auto; display: block; }
 .feature-figure--wide a { display: block; }
-a:focus-visible { outline: 2px solid var(--marginalia); outline-offset: 3px; }
