@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Your Name — Research</title>
+  <meta name="description" content="Academic profile and research of Your Name." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="site-head">
+    <a class="wordmark" href="#top">YN<span class="dot">.</span></a>
+    <nav class="nav">
+      <a href="#about">About</a>
+      <a href="#project">Project</a>
+      <a href="#publications">Publications</a>
+      <a href="#cv">CV</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+
+    <!-- HERO -->
+    <section class="hero">
+      <p class="eyebrow">Researcher &middot; <span class="field">Your Field</span></p>
+      <h1 class="display">
+        I study <em>how&nbsp;things&nbsp;work</em>,<br />
+        and write down what I find.
+      </h1>
+      <p class="lede">
+        One or two sentences on the question that drives your work — the
+        thing you'd say to a curious stranger at a conference before the
+        jargon kicks in. Make it plain, make it yours.
+      </p>
+      <div class="hero-meta">
+        <span class="meta-item">University / Lab</span>
+        <span class="meta-item">City, Country</span>
+        <a class="meta-item link" href="mailto:you@university.edu">you@university.edu</a>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="block">
+      <div class="block-label"><span>01</span> About</div>
+      <div class="block-body two-col">
+        <div class="portrait">
+          <img src="assets/img/portrait.jpg" alt="Portrait of Your Name" onerror="this.style.display='none';this.parentNode.classList.add('portrait--empty')" />
+          <span class="portrait-fallback">Your photo →<br />assets/img/portrait.jpg</span>
+        </div>
+        <div class="prose">
+          <p>
+            I'm a [position — e.g. PhD candidate / postdoc / professor] at
+            [institution], where I work on [research area]. Replace this with
+            two or three short paragraphs: what you work on, why it matters,
+            and how you got here.
+          </p>
+          <p>
+            Before this I was at [previous place], and I hold degrees in
+            [fields] from [universities]. Outside research I [something human —
+            it helps people remember you].
+          </p>
+          <p class="interests">
+            <strong>Interests:</strong> topic one, topic two, topic three,
+            topic four.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURED PROJECT -->
+    <section id="project" class="block block--feature">
+      <div class="block-label"><span>02</span> Featured project</div>
+      <div class="feature-card">
+        <div class="feature-head">
+          <h2>Project Title Goes Here</h2>
+          <p class="feature-status">2024 — present</p>
+        </div>
+        <p class="feature-lede">
+          The headline claim of the project in one sentence — what you're
+          building or discovering, and the result someone should remember.
+        </p>
+        <div class="feature-grid">
+          <div class="prose">
+            <p>
+              A paragraph of context: the problem, your approach, and what's
+              new about it. Keep it readable for someone outside your
+              subfield. Add a second paragraph if the work deserves it.
+            </p>
+            <div class="feature-links">
+              <a class="pill" href="#">Paper</a>
+              <a class="pill" href="#">Code</a>
+              <a class="pill" href="#">Demo</a>
+            </div>
+          </div>
+          <figure class="feature-figure">
+            <img src="assets/img/project.jpg" alt="Figure from the project" onerror="this.parentNode.classList.add('figure--empty')" />
+            <figcaption>A key figure, plot, or diagram → assets/img/project.jpg</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- PUBLICATIONS -->
+    <section id="publications" class="block">
+      <div class="block-label"><span>03</span> Publications</div>
+      <ol class="pub-list">
+        <li class="pub">
+          <span class="pub-year">2025</span>
+          <div class="pub-body">
+            <p class="pub-title">Title of the paper as it appears in print.</p>
+            <p class="pub-authors"><strong>Your Name</strong>, Coauthor A, Coauthor B.</p>
+            <p class="pub-venue">Venue / Journal, 2025.</p>
+            <div class="pub-links"><a href="#">PDF</a><a href="#">arXiv</a><a href="#">Cite</a></div>
+          </div>
+        </li>
+        <li class="pub">
+          <span class="pub-year">2024</span>
+          <div class="pub-body">
+            <p class="pub-title">Another paper title, likely the one you're proudest of.</p>
+            <p class="pub-authors">Coauthor A, <strong>Your Name</strong>, Coauthor C.</p>
+            <p class="pub-venue">Conference Name (Oral), 2024.</p>
+            <div class="pub-links"><a href="#">PDF</a><a href="#">Code</a></div>
+          </div>
+        </li>
+        <li class="pub">
+          <span class="pub-year">2023</span>
+          <div class="pub-body">
+            <p class="pub-title">An earlier paper — duplicate this &lt;li&gt; block for each entry.</p>
+            <p class="pub-authors"><strong>Your Name</strong>, Coauthor D.</p>
+            <p class="pub-venue">Workshop / Preprint, 2023.</p>
+            <div class="pub-links"><a href="#">PDF</a></div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- CV -->
+    <section id="cv" class="block block--cv">
+      <div class="block-label"><span>04</span> CV</div>
+      <div class="block-body">
+        <p class="prose">
+          A short line pointing people to the full document, then the download.
+        </p>
+        <a class="download" href="assets/pdf/cv.pdf">Download CV (PDF) ↓</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="contact" class="site-foot">
+    <div class="foot-grid">
+      <div>
+        <p class="foot-name">Your Name</p>
+        <p class="foot-line">[Position], [Institution]</p>
+        <a class="foot-mail" href="mailto:you@university.edu">you@university.edu</a>
+      </div>
+      <nav class="foot-links">
+        <a href="#">Google Scholar</a>
+        <a href="#">GitHub</a>
+        <a href="#">ORCID</a>
+        <a href="#">Bluesky</a>
+      </nav>
+    </div>
+    <p class="colophon">Built for GitHub Pages. Last updated 2026.</p>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.nav a, .foot-links a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href');
+        if (id.length > 1 && document.querySelector(id)) {
+          e.preventDefault();
+          document.querySelector(id).scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
