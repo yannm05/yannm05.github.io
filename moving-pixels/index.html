@@ -316,7 +316,6 @@ const SCHOOLS = [
   ["St George's International School", "Luxembourg"], ["Waldorfschoul Lëtzebuerg", "Luxembourg"]
 ].sort((a, b) => a[0].localeCompare(b[0], 'fr'));
 const OTHER_SCHOOL = 'Another school';
-const MIN_PLAYERS = 3; // a school needs this many games before it is ranked; about 10 is suggested for the event
 const SCEN_LABEL = { RCP26: 'Strong cuts', RCP45: 'Some cuts', RCP70: 'Few cuts', RCP85: 'No cuts' };
 const SCEN_TECH = { RCP26: 'RCP2.6', RCP45: 'RCP4.5', RCP70: 'RCP7.0', RCP85: 'RCP8.5' };
 // Pictures for the four futures, so nobody needs to know what an RCP is. The warming is not a CliC:ME figure: it is the IPCC's best
@@ -473,11 +472,14 @@ const ACTIVITIES = [
 ];
 function nextMenu(current) {
   const done = loadDone(), list = ACTIVITIES.filter(a => a.id !== current);
-  return `<section id="nxt" class="stack"><h2>What next?</h2><div class="grid2">${list.map((a, i) => `<button class="btn tile ${i === list.length - 1 && list.length % 2 ? 'gridwide' : ''}" id="nx-${a.id}" type="button"><span>${done.includes(a.id) ? '✓ ' : ''}${esc(a.name)}</span><span class="small">${esc(a.sub)}</span></button>`).join('')}</div><button class="btn ghost wide" id="nxhome" type="button">Back to the start</button></section>`;
+  const pts = PLAYER ? playerScore(PLAYER) : 0;
+  const fin = pts ? `<button class="btn primary wide big" id="nxfin" type="button">🏁 Finish · enter the prize draw<span class="small" style="display:block">${pts} points so far</span></button>` : '';
+  return `<section id="nxt" class="stack">${fin}<h2>${pts ? 'Or play more for more points' : 'What next?'}</h2><div class="grid2">${list.map((a, i) => `<button class="btn tile ${i === list.length - 1 && list.length % 2 ? 'gridwide' : ''}" id="nx-${a.id}" type="button"><span>${done.includes(a.id) ? '✓ ' : ''}${esc(a.name)}</span><span class="small">${esc(a.sub)}</span></button>`).join('')}</div><button class="btn ghost wide" id="nxhome" type="button">Back to the start</button></section>`;
 }
 function wireNext() {
   ACTIVITIES.forEach(a => { const b = $('#nx-' + a.id); if (b) b.onclick = a.go; });
   const h = $('#nxhome'); if (h) h.onclick = startScreen;
+  const f = $('#nxfin'); if (f) f.onclick = finishScreen;
 }
 
 /* ---------- state ---------- */
@@ -493,7 +495,7 @@ let Q = D;
 function newGame(rounds, me) {
   const rcp = window.__rcp || (Math.random() < .5 ? 'RCP70' : 'RCP85');
   Q = rcp === 'RCP70' ? D : Object.assign({}, D, D.quiz85);
-  G = { rounds, rcp, i: 0, score: 0, name: me.nick, school: me.school, cls: me.cls, realName: me.realName, c: Q.pool[Math.random() * Q.pool.length | 0], log: [] };
+  G = { rounds, rcp, i: 0, score: 0, name: me.nick, school: me.school, c: Q.pool[Math.random() * Q.pool.length | 0], log: [] };
   futureCard();
 }
 // Before the first question: which future this game is set in, as pictures
@@ -849,32 +851,46 @@ const BOARD = 'movingpixels.scores.v2';
 const loadBoard = () => { try { return JSON.parse(localStorage.getItem(BOARD)) || []; } catch (e) { return []; } };
 const saveBoard = b => { try { localStorage.setItem(BOARD, JSON.stringify(b)); } catch (e) { /* storage unavailable */ } };
 
-/* Lycée battle score (team decision, 9 Nov 2026): every scored game gives a percentage; a player's score is the average of their
-   best percentage in each game they played, times 10, so out of 1000. Playing more games only helps if they go well.
+/* Lycée battle points (changed 10 Nov 2026 from averages to sums, so playing more pays off): every scored game gives up to
+   100 points; a player's points are their best result in each game, added up (7 games, so up to 700). Replaying a game only
+   counts if it beats your best. A lycée's points are all its players' points added up, so bringing classmates helps.
    A player is whoever pressed Start with a nickname and lycée; the same nickname and lycée continue the same player.
-   Tiny World and Who's in a pixel have no score, and quick play does not count. */
+   Tiny World, Who's in a pixel and the kids' game have no score, and quick play does not count. */
+const SCORED = { quiz: 'The quiz', paint: 'Paint the Map', rising: 'Rising Water', detective: 'Climate Detective', draw: 'You draw it', fact: 'Fact or Fiction', carib: 'Caribbean Shifts' };
+const MAX_POINTS = Object.keys(SCORED).length * 100;
+/* Prize draw: a Google Form. Make the form, use "Get pre-filled link" and type NICK, LYCEE, POINTS, GAMES, CODE and PLAYER into
+   the matching short-answer questions, then paste that link here. The app swaps the words for the player's own values.
+   Empty: the Finish screen says the form is not linked yet. */
+const PRIZE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeMFNO1y9-UaPwosUo-nZDAZx_XNbHoJ9ZSeUlf926U940rYg/viewform?usp=pp_url&entry.1237096517=NICK&entry.2062483894=LYCEE&entry.1472489520=POINTS&entry.695689160=GAMES&entry.653014422=CODE&entry.444130336=PLAYER';
+// Short check code sent with the form, so a typed-over points value can be spotted in the responses sheet. Not security, just a check.
+const checkCode = (pl, pts) => { let h = 2166136261; for (const ch of `cm|${pl.id}|${pl.n}|${pl.school}|${pts}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36).slice(-5).toUpperCase(); };
 const PLAYER_KEY = 'movingpixels.player.v2';
+const newId = () => Date.now() * 1000 + (Math.random() * 1000 | 0); // unique per player, also across phones in the form responses
 let PLAYER = (() => { try { return JSON.parse(localStorage.getItem(PLAYER_KEY)) || null; } catch (e) { return null; } })();
 const savePlayer = () => { try { localStorage.setItem(PLAYER_KEY, JSON.stringify(PLAYER)); } catch (e) { /* storage unavailable */ } };
 function startPlayer(nick, school) {
-  if (!PLAYER || PLAYER.n !== nick || PLAYER.school !== school) PLAYER = { id: Date.now(), n: nick, school, best: {} };
+  if (!PLAYER || PLAYER.n !== nick || PLAYER.school !== school) PLAYER = { id: newId(), n: nick, school, best: {} };
   savePlayer();
 }
-const playerScore = pl => { const v = Object.values(pl.best); return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length * 10) : 0; };
+const playerScore = pl => Object.values(pl.best).reduce((a, b) => a + b, 0);
 // Records a finished game and returns the line shown on its end screen
 function recordGame(id, pct) {
-  if (!PLAYER) PLAYER = { id: Date.now(), n: randName(), school: '', best: {} };
-  PLAYER.best[id] = Math.max(PLAYER.best[id] || 0, Math.round(Math.max(0, Math.min(100, pct))));
+  if (!PLAYER) PLAYER = { id: newId(), n: randName(), school: '', best: {} };
+  const got = Math.round(Math.max(0, Math.min(100, pct))), old = PLAYER.best[id] || 0;
+  PLAYER.best[id] = Math.max(old, got);
   savePlayer();
   const n = Object.keys(PLAYER.best).length, sc = playerScore(PLAYER);
   const b = loadBoard().filter(e => e.id !== PLAYER.id);
   b.push({ id: PLAYER.id, n: PLAYER.n, s: sc, g: n, school: PLAYER.school || '' });
   b.sort((x, y) => y.s - x.s); saveBoard(b.slice(0, 500));
-  return `<p class="scoreline">Your lycée score: <b>${sc}</b> / 1000, the average of your best result in ${n} game${n === 1 ? '' : 's'}.${PLAYER.school && PLAYER.school !== OTHER_SCHOOL ? '' : ' Pick your lycée under “Play for your lycée” to make it count.'}</p>`;
+  const gain = got > old ? (old ? `<b>+${got - old}</b> points: you beat your best (${old}) in this game.` : `<b>+${got}</b> points from this game.`)
+    : `${got} points this time; your best here is still ${old}, so your total stays the same.`;
+  const left = Object.keys(SCORED).length - n;
+  return `<p class="scoreline">${gain} Your total: <b>${sc}</b> / ${MAX_POINTS}, from ${n} of ${Object.keys(SCORED).length} games.${left ? ` Each other game can add up to 100.` : ''}${PLAYER.school && PLAYER.school !== OTHER_SCHOOL ? ' All your points count for your lycée.' : ' Pick your lycée under “Play for your lycée” to make them count.'}</p>`;
 }
 
-// What the player typed, kept only until the page closes. Class and real name are never written to storage or to a score.
-const ME = { nick: '', school: '', cls: '', realName: '' };
+// What the player typed, kept only until the page closes.
+const ME = { nick: '', school: '' };
 // Questions only: the first page teases the quiz without giving away any answers.
 const TEASERS = [
   'Can you name a country from 4% of its pixels?',
@@ -886,9 +902,9 @@ const TEASERS = [
 // The top of the school battle. Until the score service exists this only knows games played on this phone, so it never pretends otherwise.
 const PRIZE_LINE = '<p class="prizeline">🏆 The winning lycée gets an honourable mention on the CliC:ME website.</p>';
 function frontBattle() {
-  const t = schoolTable(loadBoard()), rows = [...t.ranked, ...t.waiting].slice(0, 3);
+  const rows = schoolTable(loadBoard()).slice(0, 3);
   if (!rows.length) return `<div class="battle"><h2>Lycée battle</h2>${PRIZE_LINE}<p class="small">No lycée on the board yet. Yours could be the first.</p></div>`;
-  return `<div class="battle"><h2>Lycée battle</h2>${PRIZE_LINE}<ol class="board">${rows.map((a, i) => `<li class="${a.name === ME.school ? 'me' : ''}"><b>${a.n >= MIN_PLAYERS ? i + 1 : '·'}</b><span>${esc(a.name)}<small>${playersWord(a.n)}${a.n < MIN_PLAYERS ? `, ${MIN_PLAYERS} needed for a ranking` : ''}</small></span><b>${a.avg}</b></li>`).join('')}</ol><p class="small">Average score per school. This prototype only counts games on this phone.</p></div>`;
+  return `<div class="battle"><h2>Lycée battle</h2>${PRIZE_LINE}<ol class="board">${rows.map((a, i) => `<li class="${a.name === ME.school ? 'me' : ''}"><b>${i + 1}</b><span>${esc(a.name)}<small>${playersWord(a.n)}</small></span><b>${a.sum}</b></li>`).join('')}</ol><p class="small">Points per lycée: all its players' points added up. More players and more games mean more points. This prototype only counts games on this phone.</p></div>`;
 }
 function startScreen() {
   $('#top').hidden = true;
@@ -954,7 +970,7 @@ function setupScreen(rounds) {
   $('#screen').innerHTML = `
     <h2>Who are you playing for?</h2>
     <div>
-      <label class="lab" for="school">Your lycée scores points in the battle: your score is the average of all the games you play. The winning lycée gets an honourable mention on the CliC:ME website.</label>
+      <label class="lab" for="school">Play for your lycée: every game you play adds up to 100 points to its total. The winning lycée gets an honourable mention on the CliC:ME website.</label>
       <select class="name" id="school">
         <option value="">I'm not here with a school</option>
         ${SCHOOLS.map(([n, t]) => `<option value="${esc(n)}"${ME.school === n ? ' selected' : ''}>${esc(n)} (${esc(t)})</option>`).join('')}
@@ -965,27 +981,18 @@ function setupScreen(rounds) {
       <label class="lab" for="nick">Nickname for the leaderboard (optional)</label>
       <input class="name" id="nick" maxlength="16" autocomplete="off" placeholder="${esc(randName())}" value="${esc(ME.nick)}">
     </div>
-    <details class="priv" id="prize"${ME.realName || ME.cls ? ' open' : ''}>
-      <summary>Add your name and class to win a prize</summary>
-      <div class="stack">
-        <div><label class="lab" for="realname">Your name</label><input class="name" id="realname" maxlength="40" autocomplete="off" value="${esc(ME.realName)}"></div>
-        <div><label class="lab" for="cls">Your class</label><input class="name" id="cls" maxlength="12" autocomplete="off" value="${esc(ME.cls)}"></div>
-        <p class="small">Private: these never appear on a leaderboard. They are only for finding the winners. In this prototype they are not saved or sent anywhere.</p>
-      </div>
-    </details>
+    <p class="small">🎁 Want to win a prize? When you are done playing, press <b>Finish</b> to enter the prize draw.</p>
     <button class="btn primary wide big" id="go" type="button">Start</button>
     <button class="btn ghost wide" id="back" type="button">Back</button>`;
   $('#go').onclick = () => {
     ME.nick = $('#nick').value.trim().slice(0, 16);
     ME.school = $('#school').value;
-    ME.cls = $('#cls').value.trim();
-    ME.realName = $('#realname').value.trim();
     startPlayer(ME.nick || $('#nick').placeholder, ME.school);
-    newGame(rounds, { nick: PLAYER.n, school: ME.school, cls: ME.cls, realName: ME.realName });
+    newGame(rounds, { nick: PLAYER.n, school: ME.school });
   };
   $('#back').onclick = startScreen;
 }
-// Average score per school, over its players. Another school and players without a school are left out.
+// Points per school: all its players' points added up. Another school and players without a school are left out.
 function schoolTable(rows) {
   const by = new Map();
   for (const e of rows) {
@@ -993,17 +1000,38 @@ function schoolTable(rows) {
     const a = by.get(e.school) || { name: e.school, n: 0, sum: 0 };
     a.n++; a.sum += e.s; by.set(e.school, a);
   }
-  const list = [...by.values()].map(a => ({ ...a, avg: Math.round(a.sum / a.n) }));
-  return {
-    ranked: list.filter(a => a.n >= MIN_PLAYERS).sort((x, y) => y.avg - x.avg),
-    waiting: list.filter(a => a.n < MIN_PLAYERS).sort((x, y) => y.n - x.n)
-  };
+  return [...by.values()].sort((x, y) => y.sum - x.sum || y.n - x.n);
 }
 const playersWord = n => n + (n === 1 ? ' player' : ' players');
 function battleHTML() {
-  const t = schoolTable(loadBoard());
-  if (!t.ranked.length && !t.waiting.length) return '<p class="small">No school has played yet. Choose your school on the start screen to play for it.</p>';
-  return `<ol class="board">${t.ranked.map((a, i) => `<li class="${a.name === G.school ? 'me' : ''}"><b>${i + 1}</b><span>${esc(a.name)}<small>${playersWord(a.n)}</small></span><b>${a.avg}</b></li>`).join('')}${t.waiting.map(a => `<li class="wait ${a.name === G.school ? 'me' : ''}"><b>·</b><span>${esc(a.name)}<small>${playersWord(a.n)} so far, ${MIN_PLAYERS} needed for a ranking</small></span><b>${a.avg}</b></li>`).join('')}</ol>`;
+  const t = schoolTable(loadBoard()), mine = G ? G.school : ME.school;
+  if (!t.length) return '<p class="small">No school has played yet. Choose your school on the start screen to play for it.</p>';
+  return `<ol class="board">${t.map((a, i) => `<li class="${a.name === mine ? 'me' : ''}"><b>${i + 1}</b><span>${esc(a.name)}<small>${playersWord(a.n)}</small></span><b>${a.sum}</b></li>`).join('')}</ol>`;
+}
+// The end of a visit: total points, then the prize form with nickname, lycée and points already filled in.
+function finishScreen() {
+  $('#top').hidden = true;
+  scrollTo(0, 0);
+  const pl = PLAYER || { id: 0, n: '', school: '', best: {} }, pts = playerScore(pl), code = checkCode(pl, pts);
+  const played = Object.keys(SCORED).filter(k => pl.best[k] != null), missing = Object.keys(SCORED).filter(k => pl.best[k] == null);
+  const school = pl.school && pl.school !== OTHER_SCHOOL ? pl.school : '';
+  const url = PRIZE_FORM_URL && PRIZE_FORM_URL.replace(/NICK|LYCEE|POINTS|GAMES|CODE|PLAYER/g, w => encodeURIComponent(
+    { NICK: pl.n, LYCEE: school || pl.school || 'none', POINTS: String(pts), GAMES: String(played.length), CODE: code, PLAYER: String(pl.id) }[w]));
+  $('#screen').innerHTML = `
+    <h1 class="title" style="font-size:2rem">🏁 Well played${pl.n ? ', ' + esc(pl.n) : ''}!</h1>
+    <div class="stack" style="gap:4px"><div class="final"><span>${pts}</span><small> / ${MAX_POINTS} points</small></div>
+      <p class="small">${school ? 'For ' + esc(school) + '. ' : ''}Your best result in ${played.length} of ${Object.keys(SCORED).length} games, added up.</p></div>
+    ${played.length ? `<ol class="board">${played.map(k => `<li><b>✓</b><span>${esc(SCORED[k])}</span><b>${pl.best[k]}</b></li>`).join('')}</ol>` : '<p>You have not finished a scored game yet. Play one to get points.</p>'}
+    ${missing.length && played.length ? `<p class="small">Still up to ${missing.length * 100} points to win in: ${missing.map(k => esc(SCORED[k])).join(', ')}.</p>` : ''}
+    <h2>🎁 Win a prize</h2>
+    ${url ? `<a class="btn primary wide big" style="text-decoration:none;display:block;text-align:center" href="${esc(url)}" target="_blank" rel="noopener">Enter the prize draw</a>
+      <p class="small">A short form opens. Your nickname, lycée and points are already filled in, so please leave them as they are. It asks for a WhatsApp number or an email, only so we can contact the winners. We delete them after the prizes are given.</p>
+      <p class="small">Check code: <b>${code}</b></p>`
+    : `<p class="flag">The prize form is not linked yet in this prototype.</p>`}
+    ${missing.length ? '<button class="btn wide" id="fkeep" type="button">Keep playing for more points</button>' : ''}
+    <button class="btn ghost wide" id="fhome" type="button">Back to the start</button>`;
+  if ($('#fkeep')) $('#fkeep').onclick = startScreen;
+  $('#fhome').onclick = startScreen;
 }
 function endScreen() {
   const max = G.rounds === FULL ? MAX_FULL : MAX_QUICK, s = G.score, scaled = s / max * 1000;
@@ -1030,11 +1058,10 @@ function endScreen() {
     ${G.rounds === FULL ? '' : '<p class="small">Quick play scores do not count for the lycée battle. Play the full quiz to count.</p>'}
     <h2>School battle</h2>
     ${PRIZE_LINE}
-    <p class="small">Average score per school. Each player counts once, with the average of their games.</p>
+    <p class="small">Points per lycée: all its players' points added up.</p>
     ${battleHTML()}
     <h2>Top players</h2>
     ${shown.length ? `<ol class="board">${shown.map((e, i) => `<li class="${e.id === id ? 'me' : ''}"><b>${i + 1}</b><span>${esc(e.n)}<small>${e.school ? esc(e.school) + ' · ' : ''}${e.g || 1} game${(e.g || 1) === 1 ? '' : 's'}</small></span><b>${e.s}</b></li>`).join('')}</ol>` : ''}
-    ${G.realName ? `<p class="small">Prize entry: ${esc(G.realName)}${G.cls ? ', class ' + esc(G.cls) : ''}. Only you can see this.</p>` : ''}
     <p class="small">This prototype only uses scores played on this phone. The event version will show everyone's scores.</p>
     <button class="btn wide" id="again" type="button">Play again</button>
     <p class="source">${src(SCEN_TECH[G.rcp], 2090)}. You played scenario ${SCEN_TECH[G.rcp]}, ${SCEN_WORDS[G.rcp]}. Natural Earth borders.</p>`;
@@ -2872,7 +2899,7 @@ const m = /^#dev-(\d|end)([am]?)(?:-([A-Z]{3}))?(?:-v(\d))?$/.exec(location.hash
 if (m) {
   const rcp = window.__rcp || 'RCP70';
   Q = rcp === 'RCP70' ? D : Object.assign({}, D, D.quiz85);
-  G = { rounds: FULL, rcp, v: m[4] == null ? null : +m[4], i: m[1] === 'end' ? FULL.length : +m[1] - 1, score: m[1] === 'end' ? 640 : 0, name: 'Test', school: 'Lycée Bel-Val', cls: '4e', realName: 'Test Name', c: Q.pool.find(p => p.iso === m[3]) || Q.pool[3], log: [] };
+  G = { rounds: FULL, rcp, v: m[4] == null ? null : +m[4], i: m[1] === 'end' ? FULL.length : +m[1] - 1, score: m[1] === 'end' ? 640 : 0, name: 'Test', school: 'Lycée Bel-Val', c: Q.pool.find(p => p.iso === m[3]) || Q.pool[3], log: [] };
   next();
   if (m[2] === 'a' && window.__auto) window.__auto();
   if (m[2] === 'm') { $('#more').click(); $('#more').click(); $('#more').click(); }
@@ -2896,7 +2923,8 @@ if (m) {
   tinyWorld(+(location.hash.split('-')[1] || 0)); // #tiny opens the activity directly
 } else if (/^#water(-\d)?$/.test(location.hash)) {
   risingWater(+(location.hash.split('-')[1] || 0)); // #water opens the activity directly, e.g. from its own QR code at the stand
-} else if (location.hash === '#dev-form') { setupScreen(FULL); $('#prize').open = true;
+} else if (location.hash === '#dev-form') { setupScreen(FULL);
+} else if (location.hash === '#dev-finish') { PLAYER = { id: 1, n: 'Test', school: 'Lycée Bel-Val', best: { quiz: 64, paint: 80, fact: 90 } }; finishScreen();
 } else { startScreen(); }
 })();
 </script>

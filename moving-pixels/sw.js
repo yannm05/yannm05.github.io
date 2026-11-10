@@ -1,5 +1,5 @@
-// Moving Pixels service worker. The build replaces 33729fb38c90, so every new version of the game gets a fresh cache.
-const CACHE = 'moving-pixels-33729fb38c90';
+// Moving Pixels service worker. The build replaces f022a95edff5, so every new version of the game gets a fresh cache.
+const CACHE = 'moving-pixels-f022a95edff5';
 const FILES = ['./', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 const WAIT_MS = 3000; // how long to wait for the network before using the saved copy
 
