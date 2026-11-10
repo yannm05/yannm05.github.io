@@ -295,29 +295,25 @@ const HAZ = [
   { name: 'Agriculture', icon: '<path d="M12 21V9M12 13c-4 0-6-2-6-6 4 0 6 2 6 6zM12 11c0-4 2-6 6-6 0 4-2 6-6 6z"/>' }
 ];
 const SCHOOLS = [
-  // Public schools and private schools following the national curriculum, as named in SCRIPT's official list of secondary schools (edustat.script.lu, 2026)
-  ["Athénée de Luxembourg", "Luxembourg"], ["Atert Lycée Redange", "Redange-sur-Attert"], ["Bouneweger Lycée", "Luxembourg"],
-  ["Centre national de formation professionnelle continue", "Esch-sur-Alzette, Ettelbruck"],
-  ["École de Commerce et de Gestion", "Luxembourg"], ["École d'Hôtellerie et de Tourisme du Luxembourg", "Diekirch"],
-  ["École internationale de Differdange et Esch-sur-Alzette", "Differdange, Esch"], ["École internationale Gaston Thorn", "Luxembourg"],
-  ["École internationale Mersch Anne Beffort", "Mersch"], ["École internationale Mondorf-les-Bains", "Mondorf-les-Bains"],
-  ["École nationale de santé du Luxembourg", "several sites"],
-  ["Lycée des Arts et Métiers", "Luxembourg"], ["Lycée Aline Mayrisch", "Luxembourg"], ["Lycée Bel-Val", "Esch-sur-Alzette"],
-  ["Lycée Classique de Diekirch", "Diekirch"], ["Lycée Classique d'Echternach", "Echternach"], ["Lycée Ermesinde Mersch", "Mersch"],
-  ["Lycée Edward Steichen", "Clervaux"], ["Lycée des Garçons Esch", "Esch-sur-Alzette"], ["Lycée Guillaume Kroll", "Esch-sur-Alzette"],
-  ["Lycée des Garçons de Luxembourg", "Luxembourg"], ["Lycée Hubert Clément", "Esch-sur-Alzette"], ["Lycée Josy Barthel Mamer", "Mamer"],
-  ["Lënster Lycée International School", "Junglinster"], ["Lycée Mathias Adam", "Pétange"], ["Lycée Michel Lucius", "Luxembourg"],
-  ["Lycée Michel Rodange", "Luxembourg"], ["Lycée du Nord", "Wiltz"], ["Lycée Nic-Biever", "Dudelange"],
-  ["Lycée Robert-Schuman Luxembourg", "Luxembourg"], ["Lycée technique Agricole", "Ettelbruck"], ["Lycée technique du Centre", "Luxembourg"],
-  ["Lycée technique d'Ettelbruck", "Ettelbruck"], ["Lycée technique de Lallange", "Esch-sur-Alzette"],
-  ["Lycée technique pour professions éducatives et sociales", "Mersch"], ["Lycée Maacher", "Grevenmacher"], ["Nordstad-Lycée", "Diekirch"],
-  ["Sportlycée", "Luxembourg"], ["Schengen Lyzeum Perl", "Perl"],
-  ["École privée Fieldgen", "Luxembourg"], ["École privée Marie Consolatrice", "Esch-sur-Alzette"], ["École privée Sainte-Sophie", "Luxembourg"],
-  ["École privée Sainte-Anne", "Ettelbruck"], ["Lycée privé Emile Metz", "Luxembourg"],
-  // Schools outside the national curriculum, kept because their students may come too
-  ["École européenne Luxembourg I", "Kirchberg"], ["École européenne Luxembourg II", "Mamer"], ["International School of Luxembourg", "Luxembourg"],
-  ["St. George's International School", "Luxembourg"], ["Lycée Vauban", "Luxembourg"], ["Fräi-Ëffentlech Waldorfschoul Lëtzebuerg", "Luxembourg"],
-  ["École nationale pour adultes", "Luxembourg"]
+  // Lycées as listed on orientation.lu (Maison de l'orientation), public and private, downloaded 10 Nov 2026.
+  // Sainte-Sophie is added by hand: orientation.lu lists the school but not under this level.
+  ["Atert-Lycée", "Redange"], ["Athénée de Luxembourg", "Luxembourg"], ["Bouneweger Lycée Luxembourg", "Luxembourg"],
+  ["Deutsch-Luxemburgisches Schengen-Lyzeum Perl", "Perl"], ["Ecole internationale Gaston Thorn", "Luxembourg"], ["Lycée Aline Mayrisch", "Luxembourg"],
+  ["Lycée Bel-Val", "Belvaux"], ["Lycée Edward Steichen", "Clervaux"], ["Lycée Ermesinde", "Mersch"],
+  ["Lycée Guillaume Kroll", "Esch-sur-Alzette"], ["Lycée Hubert Clément", "Esch-sur-Alzette"], ["Lycée Josy Barthel", "Mamer"],
+  ["Lycée Mathias Adam", "Pétange"], ["Lycée Michel Lucius", "Luxembourg"], ["Lycée Michel Rodange", "Luxembourg"],
+  ["Lycée Nic-Biever", "Dudelange"], ["Lycée Robert-Schuman", "Luxembourg"], ["Lycée Technique du Centre", "Luxembourg"],
+  ["Lycée classique d'Echternach", "Echternach"], ["Lycée classique de Diekirch", "Diekirch"], ["Lycée de Garçons d'Esch-sur-Alzette", "Esch-sur-Alzette"],
+  ["Lycée de Garçons de Luxembourg", "Luxembourg"], ["Lycée des Arts et Métiers", "Luxembourg"], ["Lycée du Nord", "Wiltz"],
+  ["Lycée technique agricole", "Gilsdorf"], ["Lycée technique d'Ettelbruck", "Ettelbruck"], ["Lycée technique de Lallange", "Esch-sur-Alzette"],
+  ["Lycée technique pour professions éducatives et sociales", "Mersch"], ["Lënster Lycée International School", "Junglinster"], ["Maacher Lycée", "Grevenmacher"],
+  ["Nordstad-Lycée", "Diekirch"], ["Sportlycée", "Luxembourg"], ["École Internationale Mersch Anne Beffort", "Mersch"],
+  ["École d'hôtellerie et de tourisme du Luxembourg", "Diekirch"], ["École de Commerce et de Gestion", "Luxembourg"], ["École internationale Differdange et Esch-sur-Alzette", "Differdange"],
+  ["École internationale de Mondorf-les-Bains", "Mondorf-les-Bains"], ["École nationale de santé du Luxembourg", "several sites"], ["École nationale pour adultes", "Luxembourg"],
+  ["Ecole Privée Marie-Consolatrice", "Esch-sur-Alzette"], ["Ecole Privée Notre-Dame Sainte-Sophie", "Luxembourg"], ["Ecole privée Fieldgen", "Luxembourg"],
+  ["Ecole privée Sainte-Anne", "Ettelbruck"], ["European School Luxembourg I", "Luxembourg"], ["European School Luxembourg II", "Bertrange"],
+  ["International School of Luxembourg", "Luxembourg"], ["Lycée Privé Emile Metz", "Luxembourg"], ["Lycée Vauban", "Luxembourg"],
+  ["St George's International School", "Luxembourg"], ["Waldorfschoul Lëtzebuerg", "Luxembourg"]
 ].sort((a, b) => a[0].localeCompare(b[0], 'fr'));
 const OTHER_SCHOOL = 'Another school';
 const MIN_PLAYERS = 3; // a school needs this many games before it is ranked; about 10 is suggested for the event
